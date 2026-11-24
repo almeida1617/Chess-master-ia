@@ -105,7 +105,7 @@ async function getPgnGames(){const db=await openPgnDb();return new Promise((reso
 async function putPgnGames(items){if(!items.length)return;const db=await openPgnDb();return new Promise((resolve,reject)=>{const tx=db.transaction(PGN_STORE,'readwrite'),store=tx.objectStore(PGN_STORE);items.forEach(g=>store.put(g));tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||new Error('Importação cancelada.'));});}
 async function deletePgnGame(id){const db=await openPgnDb();return new Promise((resolve,reject)=>{const tx=db.transaction(PGN_STORE,'readwrite');tx.objectStore(PGN_STORE).delete(id);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});}
 async function clearPgnGames(){const db=await openPgnDb();return new Promise((resolve,reject)=>{const tx=db.transaction(PGN_STORE,'readwrite');tx.objectStore(PGN_STORE).clear();tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});}
-function splitPgnCollection(raw){const chunks=raw.trim().split(/(?=^\\[Event\\s)/m).map(x=>x.trim()).filter(Boolean);return chunks.length?chunks:[raw.trim()];}
+function splitPgnCollection(raw){const chunks=raw.trim().split(/(?=^\[Event\s)/m).map(x=>x.trim()).filter(Boolean);return chunks.length?chunks:[raw.trim()];}
 async function renderPgnLibrary(){
  const host=$('pgnLibrary');let items;
  try{items=await getPgnGames();}catch(e){host.textContent='Biblioteca local indisponível: '+e.message;return;}
