@@ -21,7 +21,7 @@
 </section>
 <section id="boardPage" class="page">
 <div class="panel"><h2>Tabuleiro de análise</h2><div class="layout"><div><div id="board" class="board"></div><div id="status" class="status">Vez das brancas</div><div class="controls"><button id="undo">↶ Desfazer</button><button id="redo">↷ Refazer</button><button id="reset" class="primary">Nova partida</button><button id="flip">Virar tabuleiro</button></div><p class="hint">Toque em uma peça e depois na casa de destino. Para promoção, escolha a peça no seletor.</p><label class="hint">Peça para promoção</label><select id="promotion"><option value="q">Dama</option><option value="r">Torre</option><option value="b">Bispo</option><option value="n">Cavalo</option></select></div><div><h3>Movimentos</h3><div id="moves" class="moves">Nenhuma jogada.</div><h3>Importar / exportar</h3><textarea id="pgn" class="field" placeholder="Cole um PGN aqui..."></textarea><div class="controls"><button id="import">Importar PGN</button><button id="export">Exportar PGN</button></div><textarea id="fen" class="field" placeholder="Cole uma FEN para carregar ou use Mostrar FEN..."></textarea><div class="controls"><button id="loadFen">Carregar FEN</button><button id="showFen">Mostrar FEN</button></div><p id="feedback" class="hint" aria-live="polite"></p></div></div></div>
-</section>
+<div class="panel"><h2>Análise com Stockfish 19 Lite</h2><p class="muted">Motor de análise no navegador. A primeira carga exige internet e pode demorar.</p><div class="controls"><button id="engineStart" class="primary">Carregar Stockfish</button><button id="engineAnalyze" disabled>Analisar posição atual</button><button id="engineStop" disabled>Parar análise</button><select id="engineDepth"><option value="8">Profundidade 8</option><option value="12" selected>Profundidade 12</option><option value="16">Profundidade 16</option></select></div><p id="engineStatus" class="hint" aria-live="polite">Motor ainda não carregado.</p><div id="engineOutput" class="card">A avaliação e a linha principal aparecerão aqui.</div></div></section>
 <section id="learn" class="page">
 <div class="panel"><h2>Enciclopédia de xadrez</h2><p class="muted">Conteúdo introdutório inicial. A enciclopédia será ampliada com linhas, variantes, diagramas e exercícios revisados.</p><div id="lessons" class="cards"></div></div>
 <div class="panel"><h2>Aberturas e gambitos — catálogo inicial</h2><input id="search" class="field" placeholder="Pesquisar..." /><div id="openings" class="cards"></div></div>
@@ -49,4 +49,25 @@ $('search').oninput=e=>renderOpenings(e.target.value.toLowerCase());renderOpenin
 const masters=['Magnus Carlsen','Hikaru Nakamura','Garry Kasparov','Bobby Fischer','Emanuel Lasker','José Raúl Capablanca','Anatoly Karpov','Mikhail Tal','Paul Morphy','Fabiano Caruana'];
 $('masterList').innerHTML=masters.map((m,i)=>'<article class="card"><span class="tag">JOGADOR '+(i+1)+'</span><h3>'+m+'</h3><p>Área reservada para biografia, partidas PGN verificadas e análises comentadas.</p></article>').join('');
 $('correct').onclick=()=>{$('quizResult').textContent='Correto: desenvolver as peças e disputar o centro são princípios importantes.';};$('wrong').onclick=()=>{$('quizResult').textContent='Tente novamente. Pense no desenvolvimento e no controle do centro.';};render();
+
+let sfWorker=null,sfReady=false;
+function startEngine(){
+ if(sfWorker)return;
+ const base='https://cdn.jsdelivr.net/npm/stockfish@19.0.1/bin/';
+ const src="self.Module={locateFile:(p)=>'"+base+"'+p};importScripts('"+base+"stockfish-19-lite-single.js');";
+ try{
+  sfWorker=new Worker(URL.createObjectURL(new Blob([src],{type:'text/javascript'})));
+  sfWorker.onmessage=e=>{const s=String(e.data||'');
+   if(s==='uciok')sfWorker.postMessage('isready');
+   if(s==='readyok'){sfReady=true;$('engineAnalyze').disabled=false;$('engineStop').disabled=false;$('engineStatus').textContent='Stockfish pronto.';}
+   if(s.startsWith('info ')){const d=(s.match(/\bdepth (\d+)/)||[])[1],cp=(s.match(/\bscore cp (-?\d+)/)||[])[1],mate=(s.match(/\bscore mate (-?\d+)/)||[])[1],pv=(s.match(/\bpv (.+)$/)||[])[1];$('engineOutput').textContent='Profundidade: '+(d||'—')+' | Avaliação: '+(mate?'mate em '+mate:cp?(Number(cp)/100).toFixed(2)+' peões':'calculando')+' | Linha: '+(pv||'—');}
+   if(s.startsWith('bestmove '))$('engineStatus').textContent='Análise concluída. Melhor lance UCI: '+s.split(/\s+/)[1];
+  };
+  sfWorker.onerror=()=>{$('engineStatus').textContent='Falha ao carregar o motor. Confira a conexão e tente novamente.';sfWorker=null;sfReady=false;};
+  $('engineStatus').textContent='Baixando e iniciando Stockfish...';sfWorker.postMessage('uci');
+ }catch(e){$('engineStatus').textContent='Não foi possível iniciar: '+e.message;sfWorker=null;}
+}
+$('engineStart').onclick=startEngine;
+$('engineAnalyze').onclick=()=>{if(!sfReady)return;$('engineStatus').textContent='Analisando posição atual...';$('engineOutput').textContent='Calculando...';sfWorker.postMessage('stop');sfWorker.postMessage('position fen '+game.fen());sfWorker.postMessage('go depth '+$('engineDepth').value);};
+$('engineStop').onclick=()=>{if(sfWorker)sfWorker.postMessage('stop');$('engineStatus').textContent='Análise interrompida.';};
 </script></body></html>
