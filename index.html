@@ -1,210 +1,52 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Chess Master AI</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 <style>
-:root{--bg:#101216;--panel:#1b1f27;--gold:#d8ad55;--text:#f2f2f2;--muted:#a8adb8}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
-header{padding:18px;background:#171a20;border-bottom:1px solid #343943;text-align:center}
-header h1{margin:0;color:var(--gold);font-size:25px}
-header p{margin:7px 0 0;color:var(--muted);font-size:13px}
-nav{display:flex;gap:7px;padding:10px;overflow-x:auto;background:#171a20}
-button{background:#292e38;color:white;border:1px solid #414754;border-radius:8px;padding:10px;cursor:pointer}
-button.active,.primary{background:var(--gold);color:#171717;border-color:var(--gold);font-weight:bold}
-main{max-width:1050px;margin:auto;padding:14px}
-.page{display:none}.page.active{display:block}
-.panel{background:var(--panel);border:1px solid #343943;border-radius:12px;padding:14px;margin-bottom:13px}
-h2{color:var(--gold);font-size:19px;margin:0 0 12px}
-h3{margin:8px 0;color:#f0d69c}
-.board-area{max-width:520px;margin:auto}
-#board{display:grid;grid-template-columns:repeat(8,1fr);border:4px solid #343943;border-radius:5px;overflow:hidden;aspect-ratio:1}
-.square{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:clamp(25px,7vw,48px);padding:0;border:0;border-radius:0;color:#111}
-.light{background:#e8d9b8}.dark{background:#8b684b}
-.square.selected{background:#d8ad55!important}
-.square.target{box-shadow:inset 0 0 0 5px #5caa70}
-.controls{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px;justify-content:center}
-.status{text-align:center;color:var(--gold);padding:10px;font-weight:bold}
-input,textarea{width:100%;padding:11px;background:#11151b;color:white;border:1px solid #444b57;border-radius:7px;margin:6px 0}
-textarea{min-height:100px;resize:vertical}
-.item{padding:11px;border-bottom:1px solid #353b45;line-height:1.5}
-.small{font-size:13px;color:var(--muted)}
-#moves{max-height:170px;overflow:auto;line-height:1.8;word-break:break-word}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
-footer{text-align:center;color:var(--muted);font-size:12px;padding:25px}
-</style>
-</head>
+:root{color-scheme:dark;--bg:#101216;--panel:#1b2029;--line:#343c49;--gold:#d8ad55;--text:#f4f1e9;--muted:#aab1bd;--green:#76bd8b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px system-ui,Arial}header{padding:22px 16px;text-align:center;background:#171b22;border-bottom:1px solid var(--line)}h1{margin:0;color:var(--gold);letter-spacing:1px}header p{color:var(--muted);margin:7px 0 0}nav{display:flex;gap:8px;padding:10px;overflow:auto;background:#171b22;position:sticky;top:0;z-index:3}button,select{background:#29313d;color:var(--text);border:1px solid #465160;border-radius:9px;padding:10px 13px;font:inherit}button{cursor:pointer}button.active,.primary{background:var(--gold);color:#171717;border-color:var(--gold);font-weight:700}main{max-width:1100px;margin:auto;padding:14px}.page{display:none}.page.active{display:block}.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px;margin-bottom:13px}h2{font-size:19px;color:var(--gold);margin:0 0 12px}h3{font-size:16px;margin:8px 0;color:#f0d69c}.muted,.hint{color:var(--muted);font-size:13px}.layout{display:grid;grid-template-columns:minmax(260px,520px) minmax(220px,1fr);gap:14px;align-items:start}.board{display:grid;grid-template-columns:repeat(8,1fr);aspect-ratio:1;border:4px solid #3b414c;border-radius:5px;overflow:hidden}.sq{border:0;border-radius:0;padding:0;aspect-ratio:1;display:grid;place-items:center;font-size:clamp(25px,7vw,52px);color:#111}.light{background:#e9ddc2}.dark{background:#987557}.sq.selected{background:#e0b84f!important}.sq.target{box-shadow:inset 0 0 0 5px #55a86d}.controls{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.status{text-align:center;padding:10px;color:var(--gold);font-weight:700}.moves{max-height:300px;overflow:auto;line-height:1.9;word-break:break-word}.moves button{padding:3px 6px;margin:2px}.field{width:100%;padding:11px;margin:6px 0;background:#11151b;color:white;border:1px solid #465160;border-radius:8px}textarea.field{min-height:100px}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}.card{background:#222a35;border:1px solid var(--line);border-radius:11px;padding:12px}.card p{color:var(--muted);line-height:1.5}.tag{color:var(--gold);font-size:12px}.warning{border-left:3px solid var(--gold);padding:9px 12px;background:#28251e;color:#e8ddc7;font-size:13px}footer{text-align:center;padding:24px;color:var(--muted);font-size:12px}@media(max-width:720px){.layout{grid-template-columns:1fr}.board{max-width:520px;margin:auto}}
+</style></head>
 <body>
-<header>
-<h1>♛ CHESS MASTER AI</h1>
-<p>Aprenda, pratique, analise e evolua no xadrez.</p>
-</header>
+<header><h1>♛ CHESS MASTER AI</h1><p>Estude, pratique e compreenda o xadrez — do básico ao avançado.</p></header>
 <nav>
-<button class="active" onclick="showPage('inicio',this)">Início</button>
-<button onclick="showPage('tabuleiro',this)">Tabuleiro</button>
-<button onclick="showPage('aberturas',this)">Aberturas</button>
-<button onclick="showPage('mestres',this)">Mestres</button>
-<button onclick="showPage('treino',this)">Treinamento</button>
-<button onclick="showPage('notas',this)">Anotações</button>
+<button class="active" data-page="home">Início</button><button data-page="boardPage">Tabuleiro</button><button data-page="learn">Enciclopédia</button><button data-page="masters">Grandes mestres</button><button data-page="books">Livros</button><button data-page="training">Treinamento</button>
 </nav>
 <main>
-<section id="inicio" class="page active">
-<div class="panel">
-<h2>Bem-vindo ao Chess Master AI</h2>
-<p>Seu espaço para estudar xadrez do nível iniciante ao avançado.</p>
-<div class="grid">
-<div class="panel"><h3>♟ Tabuleiro</h3><p>Jogue partidas e acompanhe os movimentos.</p><button onclick="go('tabuleiro')">Abrir tabuleiro</button></div>
-<div class="panel"><h3>📚 Aberturas</h3><p>Conheça ideias e planos de abertura.</p><button onclick="go('aberturas')">Estudar aberturas</button></div>
-<div class="panel"><h3>🎯 Treinamento</h3><p>Pratique conceitos importantes.</p><button onclick="go('treino')">Começar estudo</button></div>
-<div class="panel"><h3>📝 Anotações</h3><p>Guarde o que aprender.</p><button onclick="go('notas')">Minhas anotações</button></div>
-</div>
-</div>
-<div class="panel"><h2>Seu progresso</h2><p id="progress">Partidas realizadas: 0</p><p class="small">Seu progresso é guardado neste navegador.</p></div>
+<section id="home" class="page active">
+<div class="panel"><h2>Bem-vindo ao Chess Master AI</h2><p>Esta é a primeira etapa funcional do projeto. O tabuleiro usa regras de xadrez por meio da biblioteca chess.js. Os módulos de motor, partidas comentadas e biblioteca ampliada serão adicionados e testados nas próximas etapas.</p>
+<div class="cards"><div class="card"><h3>♟ Tabuleiro</h3><p>Jogue lances legais, desfaça, refaça e importe/exporte PGN e FEN.</p><button data-go="boardPage">Abrir tabuleiro</button></div><div class="card"><h3>📚 Enciclopédia</h3><p>Comece a estudar regras, táticas, estratégia e aberturas.</p><button data-go="learn">Estudar</button></div><div class="card"><h3>♜ Mestres</h3><p>Veja os dez jogadores que farão parte da biblioteca de partidas.</p><button data-go="masters">Ver jogadores</button></div><div class="card"><h3>📖 Livros</h3><p>Área de estudo baseada nos três livros enviados.</p><button data-go="books">Abrir biblioteca</button></div></div></div>
+<div class="panel"><h2>Estado real do projeto</h2><p class="warning">Stockfish, tutor de IA e banco completo de partidas ainda não estão integrados nesta versão. Não exibimos essas funções como se já estivessem prontas.</p></div>
 </section>
-
-<section id="tabuleiro" class="page">
-<div class="panel">
-<h2>Tabuleiro de análise</h2>
-<div class="board-area">
-<div id="board"></div>
-<div class="status" id="status">Vez das brancas</div>
-<div class="controls">
-<button onclick="undo()">↶ Desfazer</button>
-<button onclick="resetGame()">Nova partida</button>
-<button onclick="flipBoard()">Virar tabuleiro</button>
-</div>
-</div>
-</div>
-<div class="panel">
-<h2>Movimentos da partida</h2>
-<div id="moves">Nenhuma jogada ainda.</div>
-</div>
-<div class="panel">
-<h2>Importar ou exportar</h2>
-<p class="small">Cole um PGN para carregar uma partida ou copie o PGN/FEN atual.</p>
-<textarea id="pgn" placeholder="Cole aqui o PGN de uma partida..."></textarea>
-<div class="controls">
-<button onclick="importPGN()">Importar PGN</button>
-<button onclick="exportPGN()">Exportar PGN</button>
-<button onclick="showFEN()">Mostrar FEN</button>
-</div>
-<textarea id="fen" placeholder="FEN da posição atual..."></textarea>
-</div>
+<section id="boardPage" class="page">
+<div class="panel"><h2>Tabuleiro de análise</h2><div class="layout"><div><div id="board" class="board"></div><div id="status" class="status">Vez das brancas</div><div class="controls"><button id="undo">↶ Desfazer</button><button id="redo">↷ Refazer</button><button id="reset" class="primary">Nova partida</button><button id="flip">Virar tabuleiro</button></div><p class="hint">Toque em uma peça e depois na casa de destino. Para promoção, escolha a peça no seletor.</p><label class="hint">Peça para promoção</label><select id="promotion"><option value="q">Dama</option><option value="r">Torre</option><option value="b">Bispo</option><option value="n">Cavalo</option></select></div><div><h3>Movimentos</h3><div id="moves" class="moves">Nenhuma jogada.</div><h3>Importar / exportar</h3><textarea id="pgn" class="field" placeholder="Cole um PGN aqui..."></textarea><div class="controls"><button id="import">Importar PGN</button><button id="export">Exportar PGN</button></div><textarea id="fen" class="field" placeholder="Cole uma FEN para carregar ou use Mostrar FEN..."></textarea><div class="controls"><button id="loadFen">Carregar FEN</button><button id="showFen">Mostrar FEN</button></div><p id="feedback" class="hint" aria-live="polite"></p></div></div></div>
 </section>
-
-<section id="aberturas" class="page">
-<div class="panel"><h2>Biblioteca de aberturas</h2><input id="openingSearch" placeholder="Pesquisar abertura..." oninput="filterItems('openingSearch','openings')"><div id="openings"></div></div>
-<div class="panel"><h2>Enciclopédia de gambitos</h2><input id="gambitSearch" placeholder="Pesquisar gambito..." oninput="filterItems('gambitSearch','gambits')"><div id="gambits"></div></div>
+<section id="learn" class="page">
+<div class="panel"><h2>Enciclopédia de xadrez</h2><p class="muted">Conteúdo introdutório inicial. A enciclopédia será ampliada com linhas, variantes, diagramas e exercícios revisados.</p><div id="lessons" class="cards"></div></div>
+<div class="panel"><h2>Aberturas e gambitos — catálogo inicial</h2><input id="search" class="field" placeholder="Pesquisar..." /><div id="openings" class="cards"></div></div>
 </section>
-
-<section id="mestres" class="page">
-<div class="panel"><h2>Grandes mestres do xadrez</h2><div id="masters"></div><p class="small">A biblioteca apresenta informações sobre os jogadores. Partidas completas podem ser adicionadas por arquivos PGN.</p></div>
-</section>
-
-<section id="treino" class="page">
-<div class="panel">
-<h2>Treinamento de xadrez</h2>
-<div class="grid">
-<div class="panel"><h3>Tática</h3><p>Procure xeques, capturas e ameaças. Antes de jogar, pergunte: o que meu adversário ameaça?</p></div>
-<div class="panel"><h3>Estratégia</h3><p>Controle o centro, desenvolva as peças e procure melhorar sua pior peça.</p></div>
-<div class="panel"><h3>Finais</h3><p>Estude oposição do rei, atividade do rei e promoção de peões.</p></div>
-<div class="panel"><h3>Cálculo</h3><p>Analise a sequência de respostas possíveis antes de escolher um movimento.</p></div>
-</div>
-</div>
-<div class="panel">
-<h2>Desafio rápido</h2>
-<p>Qual é uma boa prioridade no início da partida?</p>
-<button onclick="answer(1)">Desenvolver as peças e controlar o centro</button>
-<button onclick="answer(2)">Mover a mesma peça muitas vezes</button>
-<button onclick="answer(2)">Sair com a dama imediatamente</button>
-<p id="answer"></p>
-</div>
-</section>
-
-<section id="notas" class="page">
-<div class="panel">
-<h2>Meu caderno de xadrez</h2>
-<p>Escreva suas ideias, planos, aberturas favoritas e erros que deseja corrigir.</p>
-<textarea id="notes" placeholder="Escreva suas anotações aqui..."></textarea>
-<button class="primary" onclick="saveNotes()">Salvar anotações</button>
-<p id="saved" class="small"></p>
-</div>
-</section>
-</main>
-<footer>Chess Master AI • Versão inicial • Desenvolvido para estudar xadrez</footer>
-
+<section id="masters" class="page"><div class="panel"><h2>Os dez grandes mestres solicitados</h2><div id="masterList" class="cards"></div><p class="warning">A ficha de cada jogador será ligada a partidas PGN verificadas. A explicação de intenção será tratada como interpretação estratégica, não como certeza psicológica, salvo quando houver comentário do próprio jogador.</p></div></section>
+<section id="books" class="page"><div class="panel"><h2>Biblioteca dos livros enviados</h2><div class="cards"><div class="card"><h3>Xadrez Básico</h3><p>Orfeu Gilberto D'Agostini</p><span class="tag">Fonte de estudo recebida</span></div><div class="card"><h3>Estratégia Moderna do Xadrez</h3><p>Ludek Pachman</p><span class="tag">Fonte de estudo recebida</span></div><div class="card"><h3>Minhas 60 Melhores Partidas</h3><p>Bobby Fischer</p><span class="tag">Fonte de estudo recebida</span></div></div><p class="warning">As aulas serão escritas com explicações originais e exercícios. Não serão reproduzidos integralmente os livros. Cada capítulo será conferido no PDF antes de ser marcado como estudado.</p></div></section>
+<section id="training" class="page"><div class="panel"><h2>Treinamento inicial</h2><div class="card"><h3>Princípio de abertura</h3><p>Qual é uma boa prioridade no começo da partida?</p><button id="correct">Desenvolver peças e disputar o centro</button><button id="wrong">Mover a mesma peça repetidamente</button><p id="quizResult" aria-live="polite"></p></div></div></section>
+</main><footer>Chess Master AI • Primeira etapa de desenvolvimento</footer>
 <script>
-const game=new Chess();
-let selected=null,targets=[],flipped=false,played=0;
-const pieces={w:{k:"♔",q:"♕",r:"♖",b:"♗",n:"♘",p:"♙"},b:{k:"♚",q:"♛",r:"♜",b:"♝",n:"♞",p:"♟"}};
-function showPage(id,btn){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active')}
-function go(id){showPage(id,[...document.querySelectorAll('nav button')].find(b=>b.textContent.toLowerCase().includes(id==='inicio'?'início':id==='tabuleiro'?'tabuleiro':id==='aberturas'?'aberturas':id==='mestres'?'mestres':id==='treino'?'treinamento':'anotações')))}
-function draw(){
-let board=document.getElementById('board');board.innerHTML='';
-let files=flipped?['h','g','f','e','d','c','b','a']:['a','b','c','d','e','f','g','h'];
-let ranks=flipped?[1,2,3,4,5,6,7,8]:[8,7,6,5,4,3,2,1];
-ranks.forEach((rank,ri)=>files.forEach((file,fi)=>{
-let sq=file+rank,p=game.get(sq),el=document.createElement('button');
-el.className='square '+((ri+fi)%2?'dark':'light');
-if(selected===sq)el.classList.add('selected');
-if(targets.includes(sq))el.classList.add('target');
-el.textContent=p?pieces[p.color][p.type]:'';
-el.onclick=()=>clickSquare(sq);board.appendChild(el);
-}));
-let turn=game.turn()==='w'?'Brancas':'Pretas';
-document.getElementById('status').textContent=game.in_checkmate()?'Xeque-mate!':game.in_check()?'Xeque! Vez das '+turn:game.in_draw()?'Empate!':'Vez das '+turn;
-let hist=game.history();document.getElementById('moves').textContent=hist.length?hist.map((m,i)=>(i%2===0?Math.floor(i/2)+1+'. ':'')+m).join('  '):'Nenhuma jogada ainda.';
-document.getElementById('progress').textContent='Partidas realizadas: '+played;
-}
-function clickSquare(sq){
-if(selected&&targets.includes(sq)){let m=game.move({from:selected,to:sq,promotion:'q'});selected=null;targets=[];if(m&&game.game_over())played++;draw();return}
-let p=game.get(sq);
-if(p&&p.color===game.turn()){selected=sq;targets=game.moves({square:sq,verbose:true}).map(m=>m.to)}else{selected=null;targets=[]}
-draw();
-}
-function undo(){game.undo();selected=null;targets=[];draw()}
-function resetGame(){game.reset();selected=null;targets=[];draw()}
-function flipBoard(){flipped=!flipped;draw()}
-function importPGN(){let s=document.getElementById('pgn').value.trim();if(!s)return alert('Cole um PGN primeiro.');game.reset();if(!game.load_pgn(s)){alert('Não foi possível ler esse PGN. Confira o texto.');game.reset()}selected=null;targets=[];draw()}
-function exportPGN(){document.getElementById('pgn').value=game.pgn();document.getElementById('pgn').select();document.execCommand('copy');alert('PGN copiado, se a permissão de cópia estiver disponível.')}
-function showFEN(){document.getElementById('fen').value=game.fen();document.getElementById('fen').select();document.execCommand('copy')}
-function answer(n){document.getElementById('answer').textContent=n===1?'Correto! Desenvolver as peças e controlar o centro são prioridades.':'Tente novamente! Pense no desenvolvimento e no controle do centro.'}
-function saveNotes(){localStorage.setItem('chessNotes',document.getElementById('notes').value);document.getElementById('saved').textContent='Anotações salvas neste navegador!'}
-function filterItems(inputId,listId){let q=document.getElementById(inputId).value.toLowerCase();document.querySelectorAll('#'+listId+' .item').forEach(x=>x.style.display=x.textContent.toLowerCase().includes(q)?'block':'none')}
-const openingData=[
-['Abertura Italiana','1. e4 e5 2. Cf3 Cc6 3. Bc4','Desenvolvimento rápido e pressão sobre o centro e o ponto f7.'],
-['Ruy López','1. e4 e5 2. Cf3 Cc6 3. Bb5','Pressiona o cavalo que defende o peão central.'],
-['Defesa Siciliana','1. e4 c5','Luta assimétrica pelo centro e oportunidades de contra-ataque.'],
-['Defesa Francesa','1. e4 e6','As pretas preparam d5 para desafiar o centro branco.'],
-['Defesa Caro-Kann','1. e4 c6','Prepara d5 com uma estrutura sólida.'],
-['Gambito da Dama','1. d4 d5 2. c4','As brancas oferecem um peão para disputar o centro.'],
-['Abertura Inglesa','1. c4','Controla casas centrais à distância.'],
-['Defesa Índia do Rei','1. d4 Cf6 2. c4 g6','As pretas permitem um centro amplo e procuram contra-atacar.'],
-['Abertura Réti','1. Cf3','Desenvolvimento flexível e controle central indireto.'],
-['Abertura Escocesa','1. e4 e5 2. Cf3 Cc6 3. d4','As brancas abrem o centro rapidamente.']
-];
-const gambitData=[
-['Gambito do Rei','1. e4 e5 2. f4','As brancas oferecem o peão f para abrir linhas e buscar iniciativa.'],
-['Gambito da Dama','1. d4 d5 2. c4','Pressiona o peão central d5; não é um gambito forçado.'],
-['Gambito Evans','1. e4 e5 2. Cf3 Cc6 3. Bc4 Bc5 4. b4','As brancas oferecem um peão para ganhar tempos de desenvolvimento.'],
-['Gambito Morra','1. e4 c5 2. d4 cxd4 3. c3','Busca desenvolvimento rápido contra a Siciliana.'],
-['Gambito Smith-Morra','1. e4 c5 2. d4 cxd4 3. c3','Uma forma conhecida do Gambito Morra.'],
-['Gambito Benko','1. d4 Cf6 2. c4 c5 3. d5 b5','As pretas oferecem um peão por pressão nas colunas abertas.'],
-['Gambito Budapest','1. d4 Cf6 2. c4 e5','As pretas oferecem um peão para ganhar atividade.'],
-['Gambito Albin','1. d4 d5 2. c4 e5','As pretas buscam iniciativa e um peão avançado.'],
-['Gambito Letão','1. e4 e5 2. Cf3 f5','Uma resposta muito aguda e arriscada das pretas.'],
-['Gambito Vienense','1. e4 e5 2. Cc3 Cf6 3. f4','As brancas buscam ataque e espaço no centro.']
-];
+const game=new Chess();let selected=null,targets=[],flipped=false,redoStack=[];
+const glyph={w:{k:'♔',q:'♕',r:'♖',b:'♗',n:'♘',p:'♙'},b:{k:'♚',q:'♛',r:'♜',b:'♝',n:'♞',p:'♟'}};
+const $=id=>document.getElementById(id);
+function page(id){document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===id));document.querySelectorAll('nav button[data-page]').forEach(x=>x.classList.toggle('active',x.dataset.page===id));}
+document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>page(b.dataset.page));document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>page(b.dataset.go));
+function render(){const el=$('board');el.innerHTML='';const files=flipped?['h','g','f','e','d','c','b','a']:['a','b','c','d','e','f','g','h'];const ranks=flipped?[1,2,3,4,5,6,7,8]:[8,7,6,5,4,3,2,1];ranks.forEach((r,ri)=>files.forEach((f,fi)=>{const sq=f+r,p=game.get(sq),b=document.createElement('button');b.className='sq '+((ri+fi)%2?'dark':'light')+(selected===sq?' selected':'')+(targets.includes(sq)?' target':'');b.textContent=p?glyph[p.color][p.type]:'';b.setAttribute('aria-label',sq+(p?' '+p.type:''));b.onclick=()=>tap(sq);el.appendChild(b)}));const side=game.turn()==='w'?'brancas':'pretas';$('status').textContent=game.is_checkmate()?'Xeque-mate!':game.is_check()?'Xeque! Vez das '+side:game.is_stalemate()?'Afogamento — empate':game.is_draw()?'Empate': 'Vez das '+side;const h=game.history();$('moves').textContent=h.length?h.map((m,i)=>(i%2===0?(Math.floor(i/2)+1)+'. ':'')+m).join('  '):'Nenhuma jogada.';$('undo').disabled=h.length===0;$('redo').disabled=redoStack.length===0;}
+function tap(sq){if(selected&&targets.includes(sq)){const move=game.move({from:selected,to:sq,promotion:$('promotion').value});if(move){redoStack=[];$('feedback').textContent='Lance registrado: '+move.san;}selected=null;targets=[];render();return;}const p=game.get(sq);if(p&&p.color===game.turn()){selected=sq;targets=game.moves({square:sq,verbose:true}).map(m=>m.to)}else{selected=null;targets=[]}$('feedback').textContent='';render();}
+$('undo').onclick=()=>{const m=game.undo();if(m)redoStack.push(m);selected=null;targets=[];render();};$('redo').onclick=()=>{const m=redoStack.pop();if(m){game.move(m);render();}};$('reset').onclick=()=>{game.reset();redoStack=[];selected=null;targets=[];$('feedback').textContent='Nova partida iniciada.';render();};$('flip').onclick=()=>{flipped=!flipped;render();};
+$('import').onclick=()=>{game.reset();redoStack=[];const ok=game.load_pgn($('pgn').value.trim());if(!ok){game.reset();$('feedback').textContent='PGN inválido ou não reconhecido.';}else $('feedback').textContent='PGN carregado.';selected=null;targets=[];render();};
+$('export').onclick=()=>{$('pgn').value=game.pgn();$('feedback').textContent='PGN colocado no campo para copiar.';};$('showFen').onclick=()=>{$('fen').value=game.fen();};$('loadFen').onclick=()=>{const ok=game.load($('fen').value.trim());if(!ok){$('feedback').textContent='FEN inválida.';return;}redoStack=[];selected=null;targets=[];$('feedback').textContent='Posição FEN carregada.';render();};
+const lessons=[['Movimentos das peças','Regras de movimento, captura e alcance de cada peça.'],['Movimentos especiais','Roque, en passant e promoção com escolha da peça.'],['Táticas','Garfo, cravada, espeto, ataque descoberto, desvio e remoção do defensor.'],['Estratégia','Centro, desenvolvimento, estrutura de peões, casas fortes e atividade das peças.'],['Xeque-mate','Padrões de mate, redes de mate e defesa contra ameaças.'],['Finais','Rei e peões, oposição, finais de torre e peças menores.']];
+$('lessons').innerHTML=lessons.map(x=>'<article class="card"><h3>'+x[0]+'</h3><p>'+x[1]+'</p></article>').join('');
+const openings=[['Italiana','1. e4 e5 2. Cf3 Cc6 3. Bc4','Desenvolvimento rápido e pressão sobre f7.'],['Ruy López','1. e4 e5 2. Cf3 Cc6 3. Bb5','Pressão sobre o defensor do peão e5.'],['Siciliana','1. e4 c5','Luta assimétrica pelo centro.'],['Francesa','1. e4 e6','Prepara ...d5 para desafiar o centro.'],['Caro-Kann','1. e4 c6','Prepara ...d5 com estrutura sólida.'],['Gambito da Dama','1. d4 d5 2. c4','Pressiona o centro; o peão de c4 pode ser aceito.'],['Gambito do Rei','1. e4 e5 2. f4','Oferta de peão em busca de iniciativa.'],['Gambito Evans','1. e4 e5 2. Cf3 Cc6 3. Bc4 Bc5 4. b4','Sacrifício de peão por tempos de desenvolvimento.'],['Gambito Morra','1. e4 c5 2. d4 cxd4 3. c3','Oferta de peão contra a Siciliana para acelerar o desenvolvimento.'],['Gambito Benko','1. d4 Cf6 2. c4 c5 3. d5 b5','As pretas buscam pressão duradoura nas colunas abertas.'],['Inglesa','1. c4','Controle indireto das casas centrais.'],['Réti','1. Cf3','Desenvolvimento flexível e controle central indireto.']];
+function renderOpenings(q=''){$('openings').innerHTML=openings.filter(x=>x.join(' ').toLowerCase().includes(q)).map(x=>'<article class="card"><h3>'+x[0]+'</h3><b>'+x[1]+'</b><p>'+x[2]+'</p></article>').join('')||'<p>Nenhum resultado.</p>';}
+$('search').oninput=e=>renderOpenings(e.target.value.toLowerCase());renderOpenings();
 const masters=['Magnus Carlsen','Hikaru Nakamura','Garry Kasparov','Bobby Fischer','Emanuel Lasker','José Raúl Capablanca','Anatoly Karpov','Mikhail Tal','Paul Morphy','Fabiano Caruana'];
-function renderList(id,data){document.getElementById(id).innerHTML=data.map(x=>'<div class="item"><h3>'+x[0]+'</h3><b>'+x[1]+'</b><br>'+x[2]+'</div>').join('')}
-renderList('openings',openingData);renderList('gambits',gambitData);
-document.getElementById('masters').innerHTML=masters.map((m,i)=>'<div class="item"><b>'+(i+1)+'. '+m+'</b></div>').join('');
-document.getElementById('notes').value=localStorage.getItem('chessNotes')||'';
-draw();
-</script>
-</body>
-</html>
+$('masterList').innerHTML=masters.map((m,i)=>'<article class="card"><span class="tag">JOGADOR '+(i+1)+'</span><h3>'+m+'</h3><p>Área reservada para biografia, partidas PGN verificadas e análises comentadas.</p></article>').join('');
+$('correct').onclick=()=>{$('quizResult').textContent='Correto: desenvolver as peças e disputar o centro são princípios importantes.';};$('wrong').onclick=()=>{$('quizResult').textContent='Tente novamente. Pense no desenvolvimento e no controle do centro.';};render();
+</script></body></html>
