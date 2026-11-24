@@ -26,7 +26,8 @@
 <div class="panel"><h2>Enciclopédia de xadrez</h2><p class="muted">Conteúdo introdutório inicial. A enciclopédia será ampliada com linhas, variantes, diagramas e exercícios revisados.</p><div id="lessons" class="cards"></div></div>
 <div class="panel"><h2>Aberturas e gambitos — catálogo inicial</h2><input id="search" class="field" placeholder="Pesquisar..." /><div id="openings" class="cards"></div></div>
 </section>
-<section id="masters" class="page"><div class="panel"><h2>Os dez grandes mestres solicitados</h2><div id="masterList" class="cards"></div><p class="warning">A ficha de cada jogador será ligada a partidas PGN verificadas. A explicação de intenção será tratada como interpretação estratégica, não como certeza psicológica, salvo quando houver comentário do próprio jogador.</p></div></section>
+<section id="masters" class="page"><div class="panel"><h2>Os dez grandes mestres solicitados</h2><div id="masterList" class="cards"></div><p class="warning">A ficha de cada jogador será ligada a partidas PGN verificadas. A explicação de intenção será tratada como interpretação estratégica, não como certeza psicológica, salvo quando houver comentário do próprio jogador.</p></div>
+<div class="panel"><h2>Minha biblioteca de partidas PGN</h2><p class="muted">Importe arquivos PGN de uma partida por arquivo. Eles ficam salvos somente neste navegador. Depois, abra a partida no tabuleiro para percorrer os lances e usar o Stockfish.</p><input id="pgnFiles" class="field" type="file" accept=".pgn,.txt,text/plain" multiple><div class="controls"><button id="savePgnFiles" class="primary">Importar partidas</button><button id="clearPgnLibrary">Limpar biblioteca local</button></div><p id="pgnLibraryStatus" class="hint" aria-live="polite"></p><div id="pgnLibrary" class="cards"></div></div></section>
 <section id="books" class="page"><div class="panel"><h2>Biblioteca dos livros enviados</h2><div class="cards"><div class="card"><h3>Xadrez Básico</h3><p>Orfeu Gilberto D'Agostini</p><span class="tag">Fonte de estudo recebida</span></div><div class="card"><h3>Estratégia Moderna do Xadrez</h3><p>Ludek Pachman</p><span class="tag">Fonte de estudo recebida</span></div><div class="card"><h3>Minhas 60 Melhores Partidas</h3><p>Bobby Fischer</p><span class="tag">Fonte de estudo recebida</span></div></div><p class="warning">As aulas serão escritas com explicações originais e exercícios. Não serão reproduzidos integralmente os livros. Cada capítulo será conferido no PDF antes de ser marcado como estudado.</p></div></section>
 <section id="training" class="page"><div class="panel"><h2>Treinamento inicial</h2><div class="card"><h3>Princípio de abertura</h3><p>Qual é uma boa prioridade no começo da partida?</p><button id="correct">Desenvolver peças e disputar o centro</button><button id="wrong">Mover a mesma peça repetidamente</button><p id="quizResult" aria-live="polite"></p></div></div></section>
 </main><footer>Chess Master AI • Primeira etapa de desenvolvimento</footer>
@@ -92,6 +93,26 @@ const openings=[
 ];
 function renderOpenings(q=''){$('openings').innerHTML=openings.filter(x=>x.join(' ').toLowerCase().includes(q)).map(x=>'<article class="card"><h3>'+x[0]+'</h3><b>'+x[1]+'</b><p>'+x[2]+'</p></article>').join('')||'<p>Nenhum resultado.</p>';}
 $('search').oninput=e=>renderOpenings(e.target.value.toLowerCase());renderOpenings();
+
+const PGN_STORE='chessMasterAiPgnLibraryV1';
+function readPgnLibrary(){try{return JSON.parse(localStorage.getItem(PGN_STORE)||'[]')}catch(e){return []}}
+function writePgnLibrary(items){localStorage.setItem(PGN_STORE,JSON.stringify(items))}
+function renderPgnLibrary(){
+ const items=readPgnLibrary();const host=$('pgnLibrary');
+ if(!items.length){host.innerHTML='<p class="muted">Nenhuma partida importada ainda.</p>';return;}
+ host.innerHTML=items.map((g,i)=>'<article class="card"><span class="tag">'+(g.date||'Data não informada')+' • '+(g.result||'Resultado não informado')+'</span><h3>'+g.white+' × '+g.black+'</h3><p>'+(g.event||'Evento não informado')+'</p><div class="controls"><button data-open-pgn="'+i+'">Abrir no tabuleiro</button><button data-remove-pgn="'+i+'">Remover</button></div></article>').join('');
+ host.querySelectorAll('[data-open-pgn]').forEach(b=>b.onclick=()=>{const g=readPgnLibrary()[Number(b.dataset.openPgn)];if(!g)return;game.reset();const ok=game.load_pgn(g.pgn);if(!ok){$('pgnLibraryStatus').textContent='Não foi possível abrir este PGN.';return;}redoStack=[];selected=null;targets=[];$('pgn').value=g.pgn;$('feedback').textContent='Partida carregada: '+g.white+' × '+g.black+'. Use Desfazer para voltar pelos lances.';render();page('boardPage');});
+ host.querySelectorAll('[data-remove-pgn]').forEach(b=>b.onclick=()=>{const a=readPgnLibrary();a.splice(Number(b.dataset.removePgn),1);writePgnLibrary(a);renderPgnLibrary();});
+}
+$('savePgnFiles').onclick=async()=>{
+ const files=Array.from($('pgnFiles').files||[]);if(!files.length){$('pgnLibraryStatus').textContent='Escolha pelo menos um arquivo PGN.';return;}
+ const items=readPgnLibrary();let added=0,errors=0;
+ for(const file of files){try{const raw=await file.text();const test=new Chess();if(!test.load_pgn(raw.trim())){errors++;continue;}const h=test.header();items.push({id:Date.now()+'-'+Math.random().toString(16).slice(2),white:h.White||'Brancas',black:h.Black||'Pretas',date:h.Date||'',event:h.Event||file.name,result:h.Result||'',pgn:raw.trim()});added++;}catch(e){errors++;}}
+ writePgnLibrary(items);renderPgnLibrary();$('pgnFiles').value='';$('pgnLibraryStatus').textContent=added+' partida(s) importada(s). '+errors+' arquivo(s) não reconhecido(s) como PGN válido.';
+};
+$('clearPgnLibrary').onclick=()=>{if(confirm('Apagar todas as partidas salvas neste navegador?')){localStorage.removeItem(PGN_STORE);renderPgnLibrary();$('pgnLibraryStatus').textContent='Biblioteca local limpa.';}};
+renderPgnLibrary();
+
 const masters=['Magnus Carlsen','Hikaru Nakamura','Garry Kasparov','Bobby Fischer','Emanuel Lasker','José Raúl Capablanca','Anatoly Karpov','Mikhail Tal','Paul Morphy','Fabiano Caruana'];
 $('masterList').innerHTML=masters.map((m,i)=>'<article class="card"><span class="tag">JOGADOR '+(i+1)+'</span><h3>'+m+'</h3><p>Área reservada para biografia, partidas PGN verificadas e análises comentadas.</p></article>').join('');
 $('correct').onclick=()=>{$('quizResult').textContent='Correto: desenvolver as peças e disputar o centro são princípios importantes.';};$('wrong').onclick=()=>{$('quizResult').textContent='Tente novamente. Pense no desenvolvimento e no controle do centro.';};render();
