@@ -184,7 +184,7 @@ $('loadOnlineMaster').onclick=async()=>{
  const status=$('onlineMasterStatus');
  status.textContent='Conectando à coleção pública de '+names[code]+'...';
  try{
-  const url='https://www.pgnmentor.com/files/players/'+code+'.pgn';
+  const url='https://www.pgnmentor.com/players/'+code+'.pgn';
   const response=await fetch(url,{mode:'cors'});
   if(!response.ok)throw new Error('O servidor respondeu HTTP '+response.status+'.');
   const raw=await response.text();
@@ -222,7 +222,7 @@ async function loadMasterArchive(code,name){
  try{
   let raw='';
   try{
-   const response=await fetch('https://www.pgnmentor.com/files/players/'+code+'.zip',{mode:'cors'});
+   const response=await fetch('https://www.pgnmentor.com/players/'+code+'.zip',{mode:'cors'});
    if(!response.ok)throw new Error('ZIP HTTP '+response.status);
    if(!window.JSZip)throw new Error('Leitor ZIP não carregou; atualize a página com internet.');
    const archive=await JSZip.loadAsync(await response.arrayBuffer());
@@ -230,7 +230,7 @@ async function loadMasterArchive(code,name){
    if(!file)throw new Error('O arquivo compactado não contém PGN.');
    raw=await file.async('string');
   }catch(zipError){
-   const response=await fetch('https://www.pgnmentor.com/files/players/'+code+'.pgn',{mode:'cors'});
+   const response=await fetch('https://www.pgnmentor.com/players/'+code+'.pgn',{mode:'cors'});
    if(!response.ok)throw zipError;
    raw=await response.text();
   }
