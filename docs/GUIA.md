@@ -4,7 +4,7 @@
 - Tabuleiro 8×8 com regras legais de xadrez via chess.js.
 - Histórico de lances clicável, desfazer/refazer, inverter tabuleiro, reiniciar.
 - Importação e exportação de PGN e carregamento de FEN.
-- Biblioteca local de PGNs: importar arquivos, abrir partidas no tabuleiro e remover itens.
+- Biblioteca PGN local: importar arquivos com uma ou várias partidas, pesquisar, paginar, abrir partidas no tabuleiro e remover itens. Os jogos são guardados no IndexedDB do navegador.
 - Enciclopédia inicial de regras, tática, estratégia e finais.
 - Catálogo introdutório de 25 aberturas e gambitos.
 - Treinamento com 12 perguntas e explicações.
@@ -30,7 +30,7 @@ A coleção externa é mantida pelo PGN Mentor e pode mudar. O projeto não copi
 - O projeto é uma aplicação web estática; não tem contas, sincronização entre aparelhos, multiplayer ou tutor de IA em nuvem.
 
 ## Privacidade
-Partidas importadas, repertório e anotações ficam no armazenamento local do navegador. Limpar os dados do site pode apagar essas informações. Não importe arquivos pessoais ou dados que não queira manter no aparelho.
+Partidas importadas ficam no IndexedDB do navegador; repertório e anotações ficam no armazenamento local do navegador. Limpar os dados do site pode apagar essas informações. Não importe arquivos pessoais ou dados que não queira manter no aparelho.
 
 ## Créditos e licenças
 - chess.js: biblioteca de regras de xadrez, distribuída sob licença BSD-2-Clause.
