@@ -41,9 +41,55 @@ function tap(sq){if(selected&&targets.includes(sq)){const move=game.move({from:s
 $('undo').onclick=()=>{const m=game.undo();if(m)redoStack.push(m);selected=null;targets=[];render();};$('redo').onclick=()=>{const m=redoStack.pop();if(m){game.move(m);render();}};$('reset').onclick=()=>{game.reset();redoStack=[];selected=null;targets=[];$('feedback').textContent='Nova partida iniciada.';render();};$('flip').onclick=()=>{flipped=!flipped;render();};
 $('import').onclick=()=>{game.reset();redoStack=[];const ok=game.load_pgn($('pgn').value.trim());if(!ok){game.reset();$('feedback').textContent='PGN inválido ou não reconhecido.';}else $('feedback').textContent='PGN carregado.';selected=null;targets=[];render();};
 $('export').onclick=()=>{$('pgn').value=game.pgn();$('feedback').textContent='PGN colocado no campo para copiar.';};$('showFen').onclick=()=>{$('fen').value=game.fen();};$('loadFen').onclick=()=>{try{game.load($('fen').value.trim());redoStack=[];selected=null;targets=[];$('feedback').textContent='Posição FEN carregada.';render();}catch(e){$('feedback').textContent='FEN inválida: confira os seis campos e a posição.';}};
-const lessons=[['Movimentos das peças','Regras de movimento, captura e alcance de cada peça.'],['Movimentos especiais','Roque, en passant e promoção com escolha da peça.'],['Táticas','Garfo, cravada, espeto, ataque descoberto, desvio e remoção do defensor.'],['Estratégia','Centro, desenvolvimento, estrutura de peões, casas fortes e atividade das peças.'],['Xeque-mate','Padrões de mate, redes de mate e defesa contra ameaças.'],['Finais','Rei e peões, oposição, finais de torre e peças menores.']];
-$('lessons').innerHTML=lessons.map(x=>'<article class="card"><h3>'+x[0]+'</h3><p>'+x[1]+'</p></article>').join('');
-const openings=[['Italiana','1. e4 e5 2. Cf3 Cc6 3. Bc4','Desenvolvimento rápido e pressão sobre f7.'],['Ruy López','1. e4 e5 2. Cf3 Cc6 3. Bb5','Pressão sobre o defensor do peão e5.'],['Siciliana','1. e4 c5','Luta assimétrica pelo centro.'],['Francesa','1. e4 e6','Prepara ...d5 para desafiar o centro.'],['Caro-Kann','1. e4 c6','Prepara ...d5 com estrutura sólida.'],['Gambito da Dama','1. d4 d5 2. c4','Pressiona o centro; o peão de c4 pode ser aceito.'],['Gambito do Rei','1. e4 e5 2. f4','Oferta de peão em busca de iniciativa.'],['Gambito Evans','1. e4 e5 2. Cf3 Cc6 3. Bc4 Bc5 4. b4','Sacrifício de peão por tempos de desenvolvimento.'],['Gambito Morra','1. e4 c5 2. d4 cxd4 3. c3','Oferta de peão contra a Siciliana para acelerar o desenvolvimento.'],['Gambito Benko','1. d4 Cf6 2. c4 c5 3. d5 b5','As pretas buscam pressão duradoura nas colunas abertas.'],['Inglesa','1. c4','Controle indireto das casas centrais.'],['Réti','1. Cf3','Desenvolvimento flexível e controle central indireto.']];
+const lessons=[
+['Movimentos das peças','Peão: avança uma casa (duas na primeira jogada) e captura na diagonal. Torre: linhas e colunas. Bispo: diagonais. Dama: torre + bispo. Cavalo: salto em L e pode pular peças. Rei: uma casa em qualquer direção, sem entrar em xeque.','Comece desenvolvendo cavalos e bispos, sem deixar o rei exposto.'],
+['Movimentos especiais','Roque: movimento conjunto do rei e torre, permitido se nenhum dos dois moveu, caminho livre e rei não está em xeque nem atravessa casa atacada. En passant: captura especial imediatamente após avanço duplo do peão adversário. Promoção: ao chegar à última fileira, o peão vira dama, torre, bispo ou cavalo.','No tabuleiro, selecione a peça para promoção no menu antes de mover o peão.'],
+['Garfo','Uma peça ataca duas ou mais peças ao mesmo tempo. O cavalo é especialmente eficiente porque seu ataque não pode ser bloqueado.','Procure lances que criem duas ameaças simultâneas.'],
+['Cravada','Uma peça não pode ou não deve sair da linha de ataque porque atrás dela existe uma peça mais valiosa, frequentemente o rei ou a dama.','Diferencie cravada absoluta (rei atrás) e relativa (peça valiosa atrás).'],
+['Espeto','Ataque em linha contra uma peça valiosa; quando ela se afasta, uma peça atrás dela pode ser capturada.','Procure alinhamentos de rei, dama e torre ou bispo.'],
+['Ataque descoberto','Uma peça se move e abre a linha de ataque de outra peça que estava atrás dela. No xeque descoberto, a peça revelada dá xeque.','Antes de mover uma peça, observe quais linhas ela está liberando.'],
+['Desvio e atração','Desvio afasta uma peça defensora da função importante. Atração conduz uma peça inimiga a uma casa desfavorável.','Identifique primeiro qual peça está defendendo algo essencial.'],
+['Remoção do defensor','Uma troca ou sacrifício elimina a peça que protege uma casa, peça ou mate.','Pergunte: o que está defendendo o alvo e posso eliminar esse defensor?'],
+['Sobrecarga','Uma peça precisa cumprir várias tarefas defensivas e não consegue atender a todas.','Crie uma segunda ameaça contra o mesmo defensor.'],
+['Interferência e bloqueio','Interferência interrompe a comunicação entre peças. Bloqueio impede o avanço ou a atividade de uma peça ou peão.','Observe colunas, diagonais e linhas de defesa.'],
+['Centro e desenvolvimento','Controlar ou influenciar as casas centrais, desenvolver peças para casas ativas e preparar a segurança do rei são prioridades comuns na abertura.','Evite mover repetidamente a mesma peça sem necessidade e não avance peões sem propósito.'],
+['Estrutura de peões','Peões dobrados, isolados, atrasados, passados e ilhas de peões influenciam casas fortes, colunas abertas e planos de final.','Avalie fraquezas permanentes e possibilidades de criar um peão passado.'],
+['Casas fortes e fracas','Uma casa forte pode servir de posto avançado, especialmente para um cavalo, quando não pode ser expulsa facilmente por peões.','Procure casas protegidas por peões e sem peões adversários capazes de expulsar a peça.'],
+['Peças boas e ruins','A atividade de uma peça depende das casas disponíveis, da estrutura de peões e das linhas abertas. Um bispo pode ficar limitado por peões próprios na sua cor.','Melhore sua pior peça antes de iniciar um ataque sem apoio.'],
+['Iniciativa e profilaxia','Iniciativa é a capacidade de fazer ameaças que exigem respostas. Profilaxia é prevenir o plano mais importante do adversário.','Pergunte sempre: qual é a ameaça do oponente e como posso reduzi-la?'],
+['Finais de peões','O rei torna-se peça ativa. Oposição, casas-chave, triangulação e criação de peões passados são conceitos centrais.','Ative o rei e calcule corridas de peões antes de trocar.'],
+['Finais de torre','Atividade da torre, corte do rei, peões passados e posições defensivas são temas recorrentes.','Em geral, torre ativa é mais importante que defender passivamente peões.'],
+['Padrões de xeque-mate','Mate na última fileira, mate sufocado, mate de corredor, redes de mate e coordenação de dama e torre.','Conte as casas de fuga do rei e identifique peças defensoras.']
+];
+$('lessons').innerHTML=lessons.map((x,i)=>'<article class="card"><span class="tag">AULA '+(i+1)+'</span><h3>'+x[0]+'</h3><p>'+x[1]+'</p><p><b>Como estudar:</b> '+x[2]+'</p><button data-lesson="'+i+'">Carregar posição inicial</button></article>').join('');
+document.querySelectorAll('[data-lesson]').forEach(b=>b.onclick=()=>{page('boardPage');$('feedback').textContent='Aula: '+lessons[Number(b.dataset.lesson)][0]+'. Leia a explicação na Enciclopédia e pratique no tabuleiro. Não há posição específica associada a esta aula ainda.';});
+const openings=[
+['Abertura Italiana','1. e4 e5 2. Cf3 Cc6 3. Bc4','Desenvolvimento rápido e pressão sobre f7.'],
+['Ruy López','1. e4 e5 2. Cf3 Cc6 3. Bb5','Pressão sobre o defensor de e5 e preparação estratégica.'],
+['Abertura Escocesa','1. e4 e5 2. Cf3 Cc6 3. d4','Abre o centro cedo e leva a posições ativas.'],
+['Abertura dos Quatro Cavalos','1. e4 e5 2. Cf3 Cc6 3. Cc3 Cf6','Desenvolvimento natural e disputa central.'],
+['Defesa Siciliana','1. e4 c5','Resposta assimétrica que luta pelo centro com ...c5.'],
+['Defesa Francesa','1. e4 e6 2. d4 d5','Desafia o centro branco; atenção à atividade do bispo c8.'],
+['Defesa Caro-Kann','1. e4 c6 2. d4 d5','Estrutura sólida e desenvolvimento do bispo de casas claras.'],
+['Defesa Pirc','1. e4 d6 2. d4 Cf6 3. Cc3 g6','Permite centro amplo e prepara pressão com peças e peões.'],
+['Defesa Escandinava','1. e4 d5','Questiona imediatamente o peão e4.'],
+['Defesa Alekhine','1. e4 Cf6','Provoca o avanço dos peões centrais para atacá-los depois.'],
+['Gambito da Dama','1. d4 d5 2. c4','Pressiona o centro; o peão de c4 pode ser aceito.'],
+['Gambito do Rei','1. e4 e5 2. f4','Oferta de peão por iniciativa e desenvolvimento.'],
+['Gambito Evans','1. e4 e5 2. Cf3 Cc6 3. Bc4 Bc5 4. b4','Sacrifício de peão por tempos de desenvolvimento.'],
+['Gambito Morra','1. e4 c5 2. d4 cxd4 3. c3','Oferta de peão contra a Siciliana por atividade.'],
+['Gambito Benko','1. d4 Cf6 2. c4 c5 3. d5 b5','As pretas buscam pressão duradoura nas colunas abertas.'],
+['Gambito Budapest','1. d4 Cf6 2. c4 e5','Contra-ataque imediato ao centro branco.'],
+['Gambito Albin','1. d4 d5 2. c4 e5','Contra-gambito para obter atividade e casas centrais.'],
+['Abertura Inglesa','1. c4','Controle indireto das casas centrais.'],
+['Abertura Réti','1. Cf3','Desenvolvimento flexível e controle central indireto.'],
+['Ataque Índia do Rei','1. Cf3 d5 2. g3','Fianqueto e preparação de um centro flexível.'],
+['Defesa Índia do Rei','1. d4 Cf6 2. c4 g6 3. Cc3 Bg7','Fianqueto e contra-ataque ao centro.'],
+['Defesa Nimzo-Índia','1. d4 Cf6 2. c4 e6 3. Cc3 Bb4','Pressão sobre o cavalo e controle das casas centrais.'],
+['Defesa Grünfeld','1. d4 Cf6 2. c4 g6 3. Cc3 d5','Permite centro de peões para atacá-lo à distância.'],
+['Defesa Holandesa','1. d4 f5','Luta pelo controle de e4, com enfraquecimentos a considerar.'],
+['Defesa Eslava','1. d4 d5 2. c4 c6','Sustenta d5 e prepara desenvolvimento do bispo c8.']
+];
 function renderOpenings(q=''){$('openings').innerHTML=openings.filter(x=>x.join(' ').toLowerCase().includes(q)).map(x=>'<article class="card"><h3>'+x[0]+'</h3><b>'+x[1]+'</b><p>'+x[2]+'</p></article>').join('')||'<p>Nenhum resultado.</p>';}
 $('search').oninput=e=>renderOpenings(e.target.value.toLowerCase());renderOpenings();
 const masters=['Magnus Carlsen','Hikaru Nakamura','Garry Kasparov','Bobby Fischer','Emanuel Lasker','José Raúl Capablanca','Anatoly Karpov','Mikhail Tal','Paul Morphy','Fabiano Caruana'];
